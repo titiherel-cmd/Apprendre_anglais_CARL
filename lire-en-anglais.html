@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lire pour apprendre l'anglais</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+:root{
+  --desk:#16241C;
+  --desk-2:#1F3327;
+  --page:#F6F0E1;
+  --page-line:#E4DAC2;
+  --ink:#2A2318;
+  --ink-soft:#6B6153;
+  --gold:#C79A44;
+  --gold-soft:#EAD9AC;
+  --forest:#3E6259;
+  --forest-dark:#2C4A42;
+  --remove:#A34B3E;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:radial-gradient(ellipse at top, var(--desk-2), var(--desk) 70%);
+  min-height:100vh;
+  font-family:'Inter',sans-serif;
+  color:var(--ink);
+  display:flex;
+  justify-content:center;
+  padding:0 0 40px;
+}
+.app{
+  width:100%;
+  max-width:520px;
+  min-height:100vh;
+  background:var(--desk);
+  display:flex;
+  flex-direction:column;
+}
+
+/* header */
+header{
+  padding:22px 20px 14px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+header h1{
+  font-family:'Source Serif 4',serif;
+  font-weight:600;
+  font-size:1.25rem;
+  color:var(--gold-soft);
+  margin:0;
+  letter-spacing:0.2px;
+}
+header p{
+  margin:2px 0 0;
+  font-size:0.78rem;
+  color:#9CB3A5;
+}
+.vocab-btn{
+  background:var(--desk-2);
+  border:1px solid #33493D;
+  color:var(--gold-soft);
+  border-radius:10px;
+  padding:8px 12px;
+  font-family:'Inter',sans-serif;
+  font-size:0.82rem;
+  font-weight:500;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  cursor:pointer;
+}
+.vocab-btn .badge{
+  background:var(--gold);
+  color:var(--desk);
+  font-weight:700;
+  font-size:0.72rem;
+  border-radius:999px;
+  padding:1px 7px;
+  min-width:18px;
+  text-align:center;
+}
+
+/* selector */
+.controls{
+  padding:0 20px 14px;
+}
+select{
+  width:100%;
+  background:var(--desk-2);
+  color:var(--gold-soft);
+  border:1px solid #33493D;
+  border-radius:10px;
+  padding:10px 12px;
+  font-family:'Inter',sans-serif;
+  font-size:0.9rem;
+}
+textarea{
+  width:100%;
+  margin-top:10px;
+  min-height:110px;
+  background:var(--page);
+  color:var(--ink);
+  border:1px solid var(--page-line);
+  border-radius:10px;
+  padding:12px;
+  font-family:'Source Serif 4',serif;
+  font-size:0.95rem;
+  resize:vertical;
+}
+
+/* page card */
+.page-wrap{
+  flex:1;
+  padding:0 14px 24px;
+}
+.page{
+  background:var(--page);
+  border-radius:14px;
+  padding:22px 20px 28px;
+  box-shadow:0 12px 30px rgba(0,0,0,0.35);
+}
+.page h2{
+  font-family:'Source Serif 4',serif;
+  font-size:1.05rem;
+  font-weight:700;
+  margin:0 0 4px;
+  color:var(--ink);
+}
+.page .level{
+  font-size:0.75rem;
+  color:var(--ink-soft);
+  margin-bottom:14px;
+}
+.reader{
+  font-family:'Source Serif 4',serif;
+  font-size:1.08rem;
+  line-height:1.75;
+  max-width:70ch;
+}
+.reader p{margin:0 0 16px;}
+.w{
+  cursor:pointer;
+  border-bottom:1.5px dotted var(--gold);
+  border-radius:2px;
+  padding:0 1px;
+  transition:background .15s ease;
+}
+.w:active, .w.tapped{
+  background:var(--gold-soft);
+}
+
+/* bottom sheet */
+.sheet-backdrop{
+  position:fixed;inset:0;
+  background:rgba(10,15,12,0.45);
+  opacity:0;pointer-events:none;
+  transition:opacity .2s ease;
+  z-index:20;
+}
+.sheet-backdrop.open{opacity:1;pointer-events:auto;}
+.sheet{
+  position:fixed;
+  left:50%;
+  bottom:0;
+  transform:translate(-50%, 110%);
+  width:100%;
+  max-width:520px;
+  background:var(--page);
+  border-radius:18px 18px 0 0;
+  padding:18px 20px 22px;
+  box-shadow:0 -10px 30px rgba(0,0,0,0.4);
+  transition:transform .25s ease;
+  z-index:21;
+  border-top:3px solid var(--gold);
+}
+.sheet.open{transform:translate(-50%,0);}
+.sheet-top{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  margin-bottom:8px;
+}
+.sheet-word{
+  font-family:'Source Serif 4',serif;
+  font-size:1.35rem;
+  font-weight:700;
+}
+.sheet-type{
+  font-size:0.72rem;
+  color:var(--ink-soft);
+  text-transform:lowercase;
+}
+.sheet-close{
+  background:none;border:none;color:var(--ink-soft);
+  font-size:1.1rem;cursor:pointer;padding:4px;
+}
+.sheet-translation{
+  font-family:'Source Serif 4',serif;
+  font-size:1.15rem;
+  color:var(--forest-dark);
+  font-weight:600;
+  margin:6px 0 8px;
+}
+.sheet-note{
+  font-size:0.88rem;
+  color:var(--ink-soft);
+  line-height:1.5;
+  margin:0 0 16px;
+}
+.sheet-actions{display:flex;gap:10px;}
+.btn{
+  border:none;border-radius:10px;
+  padding:11px 14px;
+  font-family:'Inter',sans-serif;
+  font-weight:600;font-size:0.88rem;
+  cursor:pointer;
+}
+.btn-add{background:var(--forest);color:#fff;flex:1;}
+.btn-add.saved{background:var(--gold);color:var(--desk);}
+.loading-dots span{
+  display:inline-block;width:6px;height:6px;border-radius:50%;
+  background:var(--ink-soft);margin-right:4px;
+  animation:blink 1.2s infinite ease-in-out;
+}
+.loading-dots span:nth-child(2){animation-delay:.2s;}
+.loading-dots span:nth-child(3){animation-delay:.4s;}
+@keyframes blink{0%,80%,100%{opacity:.25;}40%{opacity:1;}}
+
+/* vocab panel */
+.vocab-panel{
+  position:fixed;inset:0;
+  background:var(--desk);
+  transform:translateX(105%);
+  transition:transform .25s ease;
+  z-index:30;
+  display:flex;flex-direction:column;
+}
+.vocab-panel.open{transform:translateX(0);}
+.vocab-head{
+  padding:20px;display:flex;justify-content:space-between;align-items:center;
+}
+.vocab-head h2{
+  font-family:'Source Serif 4',serif;color:var(--gold-soft);margin:0;font-size:1.1rem;
+}
+.vocab-list{flex:1;overflow-y:auto;padding:0 16px 20px;}
+.vocab-item{
+  background:var(--page);border-radius:12px;padding:14px 16px;margin-bottom:10px;
+  display:flex;justify-content:space-between;gap:10px;align-items:flex-start;
+}
+.vocab-item .vw{font-family:'Source Serif 4',serif;font-weight:700;}
+.vocab-item .vt{color:var(--forest-dark);font-weight:600;font-size:0.92rem;}
+.vocab-item .vs{font-size:0.78rem;color:var(--ink-soft);margin-top:3px;}
+.vocab-item button{
+  background:none;border:none;color:var(--remove);font-size:0.85rem;cursor:pointer;font-family:'Inter',sans-serif;
+}
+.vocab-empty{color:#9CB3A5;font-size:0.9rem;padding:10px 4px;font-family:'Inter',sans-serif;}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div>
+      <h1>Lire pour apprendre</h1>
+      <p>Touchez un mot pour sa traduction</p>
+    </div>
+    <button class="vocab-btn" id="openVocab">📖 Mes mots <span class="badge" id="vocabCount">0</span></button>
+  </header>
+
+  <div class="controls">
+    <select id="textSelect"></select>
+    <textarea id="customText" placeholder="Collez ici votre propre texte en anglais…" style="display:none;"></textarea>
+  </div>
+
+  <div class="page-wrap">
+    <div class="page">
+      <h2 id="pageTitle"></h2>
+      <div class="level" id="pageLevel"></div>
+      <div class="reader" id="reader"></div>
+    </div>
+  </div>
+</div>
+
+<div class="sheet-backdrop" id="backdrop"></div>
+<div class="sheet" id="sheet">
+  <div class="sheet-top">
+    <div>
+      <div class="sheet-word" id="sheetWord"></div>
+      <div class="sheet-type" id="sheetType"></div>
+    </div>
+    <button class="sheet-close" id="sheetClose">✕</button>
+  </div>
+  <div class="sheet-translation" id="sheetTranslation">
+    <span class="loading-dots"><span></span><span></span><span></span></span>
+  </div>
+  <div class="sheet-note" id="sheetNote"></div>
+  <div class="sheet-actions">
+    <button class="btn btn-add" id="btnAdd">＋ Ajouter à mes mots</button>
+  </div>
+</div>
+
+<div class="vocab-panel" id="vocabPanel">
+  <div class="vocab-head">
+    <h2>Mes mots enregistrés</h2>
+    <button class="sheet-close" id="closeVocab" style="color:#9CB3A5;">✕</button>
+  </div>
+  <div class="vocab-list" id="vocabListEl"></div>
+</div>
+
+<script>
+const TEXTS = {
+  morning: {
+    title: "Une matinée tranquille",
+    level: "Débutant · présent simple",
+    paragraphs: [
+      "Every morning, Clara wakes up at seven o'clock. She opens the window and looks at the garden. The birds sing in the old tree near the fence.",
+      "She makes a cup of tea and reads the news on her phone. Her cat waits quietly next to the kitchen door, hoping for breakfast.",
+      "After breakfast, Clara walks to the small bakery on the corner. The baker always smiles and gives her a fresh piece of bread to taste."
+    ]
+  },
+  lighthouse: {
+    title: "Le vieux phare",
+    level: "Intermédiaire · récit",
+    paragraphs: [
+      "The lighthouse had stood on the cliff for over a hundred years, guiding ships through the fog and the restless waves.",
+      "Every evening, old Thomas climbed the narrow stairs to light the lamp. His hands were tired, but his eyes still searched the dark horizon with the same patience as before.",
+      "One night, a storm rolled in faster than anyone expected, and Thomas noticed a small boat struggling far out at sea. He turned the light toward it and waited, hoping the crew would find their way home."
+    ]
+  },
+  cafe: {
+    title: "Au café",
+    level: "Dialogue · quotidien",
+    paragraphs: [
+      "\"Good morning! What would you like today?\" asked the waiter.",
+      "\"I'll have a coffee, please, and maybe a croissant,\" answered Sam.",
+      "\"Sure, coming right up. Would you like it here or to go?\" \"Here is fine, thank you. I'm in no hurry this morning.\""
+    ]
+  }
+};
+
+let currentSentences = [];
+let currentClickedSpan = null;
+let currentTranslationCache = {};
+let pendingSaveItem = null;
+
+const readerEl = document.getElementById('reader');
+const selectEl = document.getElementById('textSelect');
+const customTextEl = document.getElementById('customText');
+const sheet = document.getElementById('sheet');
+const backdrop = document.getElementById('backdrop');
+const sheetWord = document.getElementById('sheetWord');
+const sheetType = document.getElementById('sheetType');
+const sheetTranslation = document.getElementById('sheetTranslation');
+const sheetNote = document.getElementById('sheetNote');
+const btnAdd = document.getElementById('btnAdd');
+
+function buildSelect(){
+  Object.keys(TEXTS).forEach(id=>{
+    const opt = document.createElement('option');
+    opt.value = id;
+    opt.textContent = TEXTS[id].title;
+    selectEl.appendChild(opt);
+  });
+  const opt = document.createElement('option');
+  opt.value = 'custom';
+  opt.textContent = 'Coller mon propre texte…';
+  selectEl.appendChild(opt);
+}
+
+function escapeAttr(s){
+  return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+}
+
+function renderParagraphs(paragraphs, title, level){
+  document.getElementById('pageTitle').textContent = title;
+  document.getElementById('pageLevel').textContent = level;
+  readerEl.innerHTML = '';
+  currentSentences = [];
+
+  paragraphs.forEach(paraText=>{
+    const p = document.createElement('p');
+    const sentenceMatches = paraText.match(/[^.!?]+[.!?]*/g) || [paraText];
+    sentenceMatches.forEach(sentence=>{
+      const sIdx = currentSentences.length;
+      currentSentences.push(sentence.trim());
+      const tokens = sentence.match(/[A-Za-z]+(?:'[A-Za-z]+)?|[^A-Za-z]+/g) || [];
+      tokens.forEach(tok=>{
+        if(/^[A-Za-z]/.test(tok)){
+          const span = document.createElement('span');
+          span.className = 'w';
+          span.textContent = tok;
+          span.dataset.word = tok;
+          span.dataset.sidx = sIdx;
+          p.appendChild(span);
+        } else {
+          p.appendChild(document.createTextNode(tok));
+        }
+      });
+    });
+    readerEl.appendChild(p);
+  });
+}
+
+function loadText(id){
+  if(id === 'custom'){
+    customTextEl.style.display = 'block';
+    const val = customTextEl.value.trim();
+    if(!val){
+      document.getElementById('pageTitle').textContent = 'Votre texte';
+      document.getElementById('pageLevel').textContent = 'Collez un texte en anglais ci-dessus';
+      readerEl.innerHTML = '';
+      return;
+    }
+    const paras = val.split(/\n+/).filter(Boolean);
+    renderParagraphs(paras, 'Votre texte', 'Texte personnel');
+  } else {
+    customTextEl.style.display = 'none';
+    const t = TEXTS[id];
+    renderParagraphs(t.paragraphs, t.title, t.level);
+  }
+}
+
+selectEl.addEventListener('change', ()=>loadText(selectEl.value));
+customTextEl.addEventListener('input', ()=>{ if(selectEl.value==='custom') loadText('custom'); });
+
+readerEl.addEventListener('click', (e)=>{
+  const span = e.target.closest('.w');
+  if(!span) return;
+  document.querySelectorAll('.w.tapped').forEach(el=>el.classList.remove('tapped'));
+  span.classList.add('tapped');
+  currentClickedSpan = span;
+  openSheetFor(span.dataset.word, currentSentences[span.dataset.sidx]);
+});
+
+function openSheet(){
+  backdrop.classList.add('open');
+  sheet.classList.add('open');
+}
+function closeSheet(){
+  backdrop.classList.remove('open');
+  sheet.classList.remove('open');
+  btnAdd.classList.remove('saved');
+  btnAdd.textContent = '＋ Ajouter à mes mots';
+}
+document.getElementById('sheetClose').addEventListener('click', closeSheet);
+backdrop.addEventListener('click', closeSheet);
+
+async function openSheetFor(word, sentence){
+  sheetWord.textContent = word;
+  sheetType.textContent = '';
+  sheetTranslation.innerHTML = '<span class="loading-dots"><span></span><span></span><span></span></span>';
+  sheetNote.textContent = '';
+  btnAdd.classList.remove('saved');
+  btnAdd.textContent = '＋ Ajouter à mes mots';
+  openSheet();
+
+  const cacheKey = word.toLowerCase() + '|' + sentence;
+  if(currentTranslationCache[cacheKey]){
+    fillSheet(word, currentTranslationCache[cacheKey]);
+    return;
+  }
+
+  try{
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-6',
+        max_tokens:300,
+        messages:[{
+          role:'user',
+          content: `Tu es un dictionnaire contextuel anglais->français pour un apprenant francophone.
+Phrase: "${sentence}"
+Mot ciblé: "${word}"
+Réponds UNIQUEMENT avec un objet JSON strict, sans texte autour ni balises markdown, au format exact:
+{"traduction":"...","type":"nom/verbe/adjectif/adverbe/autre","explication":"une phrase courte en français expliquant le sens dans ce contexte"}
+La traduction doit correspondre précisément au sens du mot dans cette phrase.`
+        }]
+      })
+    });
+    const data = await resp.json();
+    const text = (data.content || []).map(b=>b.text||'').join('');
+    const clean = text.replace(/```json|```/g,'').trim();
+    const parsed = JSON.parse(clean);
+    currentTranslationCache[cacheKey] = parsed;
+    fillSheet(word, parsed);
+  }catch(err){
+    sheetTranslation.textContent = '—';
+    sheetNote.textContent = "Traduction indisponible pour le moment. Réessayez.";
+  }
+}
+
+function fillSheet(word, parsed){
+  if(currentClickedSpan && currentClickedSpan.dataset.word !== word) return;
+  sheetType.textContent = parsed.type || '';
+  sheetTranslation.textContent = parsed.traduction || '—';
+  sheetNote.textContent = parsed.explication || '';
+  pendingSaveItem = {
+    word: word,
+    translation: parsed.traduction || '',
+    type: parsed.type || '',
+    note: parsed.explication || '',
+    sentence: currentSentences[currentClickedSpan.dataset.sidx] || ''
+  };
+}
+
+btnAdd.addEventListener('click', async ()=>{
+  if(!pendingSaveItem) return;
+  try{
+    let list = [];
+    try{
+      const r = await window.storage.get('vocab-list', false);
+      if(r && r.value) list = JSON.parse(r.value);
+    }catch(e){ list = []; }
+
+    const key = pendingSaveItem.word.toLowerCase();
+    const existingIdx = list.findIndex(it=>it.word.toLowerCase()===key);
+    if(existingIdx>=0) list[existingIdx] = pendingSaveItem;
+    else list.unshift(pendingSaveItem);
+
+    await window.storage.set('vocab-list', JSON.stringify(list), false);
+    btnAdd.classList.add('saved');
+    btnAdd.textContent = '✓ Ajouté à mes mots';
+    updateVocabBadge(list.length);
+  }catch(e){
+    btnAdd.textContent = "Impossible d'enregistrer";
+  }
+});
+
+function updateVocabBadge(n){
+  document.getElementById('vocabCount').textContent = n;
+}
+
+async function getVocabList(){
+  try{
+    const r = await window.storage.get('vocab-list', false);
+    if(r && r.value) return JSON.parse(r.value);
+  }catch(e){}
+  return [];
+}
+
+async function renderVocabPanel(){
+  const list = await getVocabList();
+  updateVocabBadge(list.length);
+  const el = document.getElementById('vocabListEl');
+  el.innerHTML = '';
+  if(list.length === 0){
+    el.innerHTML = '<div class="vocab-empty">Aucun mot enregistré pour l\\'instant. Touchez un mot dans un texte, puis ajoutez-le ici.</div>';
+    return;
+  }
+  list.forEach((item, idx)=>{
+    const div = document.createElement('div');
+    div.className = 'vocab-item';
+    div.innerHTML = `
+      <div>
+        <div class="vw">${item.word}</div>
+        <div class="vt">${item.translation}</div>
+        <div class="vs">${item.note || ''}</div>
+      </div>
+      <button data-idx="${idx}">retirer</button>
+    `;
+    el.appendChild(div);
+  });
+  el.querySelectorAll('button[data-idx]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const list2 = await getVocabList();
+      list2.splice(parseInt(btn.dataset.idx),1);
+      await window.storage.set('vocab-list', JSON.stringify(list2), false);
+      renderVocabPanel();
+    });
+  });
+}
+
+const vocabPanel = document.getElementById('vocabPanel');
+document.getElementById('openVocab').addEventListener('click', ()=>{
+  vocabPanel.classList.add('open');
+  renderVocabPanel();
+});
+document.getElementById('closeVocab').addEventListener('click', ()=>{
+  vocabPanel.classList.remove('open');
+});
+
+buildSelect();
+loadText('morning');
+getVocabList().then(l=>updateVocabBadge(l.length));
+</script>
+</body>
+</html>
